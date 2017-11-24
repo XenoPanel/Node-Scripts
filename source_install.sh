@@ -2,10 +2,12 @@
 #
 #
 game_id="$1"
-server_directory="$2"
+server_id="$2"
 server_short="$3"
-server_full="$4"
-server_install="$5"
+server_username="$4"
+server_base="$5"
+server_directory="$server_base/$server_id/steamcmd"
+server_install="+login anonymous +force_install_dir $server_base/$server_id +app_update $game_id validate +quit"
 #
 #
 echo "{SOURCE_INSTALLER_START}"
@@ -14,24 +16,23 @@ printf "\n"
 # Deletect either apt-get or yum.
 #
 if [[ ! -z 'which yum' ]]; then
-	packman="yum"
+    packman="yum"
 fi
 #
 if [[ ! -z 'which apt-get' ]]; then
-	packman="apt-get"
+    packman="apt-get"
 fi
-#
 #
 # Install Figlet ready to use!
 #
 if [ "$packman" == "apt-get" ]; then
-	apt-get install -y figlet &> /dev/null
-	figlet 'XP2 Installer' -f standard &> /dev/null
+    apt-get install -y figlet &> /dev/null
+    figlet 'XP2 Installer' -f standard
 fi
 
 if [ "$packman" == "yum" ]; then
-	apt-get install -y figlet &> /dev/null
-	figlet 'XP2 Installer' -f standard &> /dev/null
+    yum install -y figlet &> /dev/null
+    figlet 'XP2 Installer' -f standard
 fi
 #
 # Starting Message
@@ -48,11 +49,11 @@ sleep 1
 #
 printf "Checking and installing dependencies... "
 if [ "$packman" == "apt-get" ]; then
-	apt-get install -y wget tar lib32gcc1 &> /dev/null
+    apt-get install -y wget tar lib32gcc1 &> /dev/null
 fi
 
 if [ "$packman" == "yum" ]; then
-	yum install -y wget tar glibc.i686 libstdc++.i686 &> /dev/null
+    yum install -y wget tar glibc.i686 libstdc++.i686 &> /dev/null
 fi
 #
 # Check if installed
@@ -69,9 +70,9 @@ fi
 printf "Downloading SteamCMD files... "
 cd /tmp &> /dev/null
 curl -sSL -o steamcmd.tar.gz http://media.steampowered.com/installer/steamcmd_linux.tar.gz &> /dev/null
-mkdir -p $server_full &> /dev/null
-tar -xzvf steamcmd.tar.gz -C $server_full/ &> /dev/null
-cd $server_full &> /dev/null
+mkdir -p $server_directory &> /dev/null
+tar -xzvf steamcmd.tar.gz -C $server_directory/ &> /dev/null
+cd $server_directory &> /dev/null
 if [ $? -eq 0 ]; then
     echo -e "\E[32m\033[1m[DONE]\033[0m"
 else
@@ -82,7 +83,8 @@ fi
 # Run SteamCMD
 #
 printf "Running SteamCMD and installing your game file... "
-cd $server_full &> /dev/null
+chown -R $server_username:panel $server_base &> /dev/null
+cd $server_directory &> /dev/null
 ./steamcmd.sh $server_install &> /dev/null
 if [ $? -eq 0 ]; then
     echo -e "\E[32m\033[1m[DONE]\033[0m"
@@ -94,6 +96,7 @@ fi
 # Copy final files
 #
 printf "Copying final files for future updating... "
+chown -R $server_username:panel $server_base &> /dev/null
 mkdir -p $server_full/.steam/sdk32 &> /dev/null
 cp -v linux32/steamclient.so $server_full/.steam/sdk32/steamclient.so &> /dev/null
 if [ $? -eq 0 ]; then
@@ -103,7 +106,8 @@ else
     exit
 fi
 #
-figlet 'Install Complete' -f standard &> /dev/null
+chown -R $server_username:panel $server_base &> /dev/null
+figlet 'Install Complete' -f standard
 #
 echo -e ""
 #
