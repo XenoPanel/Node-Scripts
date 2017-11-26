@@ -38,11 +38,11 @@ sleep 1
 #
 printf "Checking and installing dependencies... "
 if [ "$packman" == "apt-get" ]; then
-    apt-get install -y wget tar lib32gcc1 gdb &> /dev/null
+    apt-get install -y wget tar lib32gcc1 libgcc_s.so.1 gdb &> /dev/null
 fi
 
 if [ "$packman" == "yum" ]; then
-    yum install -y wget tar glibc.i686 libstdc++.i686 gbp &> /dev/null
+    yum install -y wget tar glibc.i686 libstdc++.i686 libgcc_s.so.1 gbp &> /dev/null
 fi
 #
 # Check if installed
