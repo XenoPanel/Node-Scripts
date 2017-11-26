@@ -42,7 +42,7 @@ if [ "$packman" == "apt-get" ]; then
 fi
 
 if [ "$packman" == "yum" ]; then
-    yum install -y wget tar glibc.i686 libstdc++.i686 libgcc_s.so.1 lib32tinfo5 ncurses-libs.i68 gbp &> /dev/null
+    yum install -y wget tar lib32gcc1 glibc.i686 libstdc++.i686 libgcc_s.so.1 lib32tinfo5 ncurses-libs.i68 gbp &> /dev/null
 fi
 #
 # Check if installed
