@@ -15,7 +15,7 @@ server_username="$4"
 login_username="$5"
 #
 server_base="/home/XenoPanel/$server_username"
-server_directory="/home/XenoPanel/$server_username/$server_id/steamcmd"
+server_directory="/home/XenoPanel/servers/$server_username/$server_id/steamcmd"
 #
 server_install="+login $login_username +force_install_dir $server_base/$server_id +app_update $game_id validate +quit"
 #
