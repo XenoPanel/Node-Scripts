@@ -109,10 +109,12 @@ printf "Updating server properties... "
 sed -i 's/%IP%.*/'"$server_ip"'/' *properties &> /dev/null
 sed -i 's/%PORT%.*/'"$server_port"'/' *properties &> /dev/null
 sed -i 's/%SLOTS%.*/'"$server_slots"'/' *properties &> /dev/null
-sed -i 's/server-ip=.*/'"server-ip=$server_ip"'/' *properties &> /dev/null
-sed -i 's/enable-query=.*/enable-query=true/g' *properties &> /dev/null
-sed -i 's/server-port=.*/'"server-port=$server_port"'/' *properties &> /dev/null
-sed -i 's/max-players=.*/'"max-players=$server_slots"'/' *properties &> /dev/null
+#
+grep -q '^server-ip=' server.properties && sed -i 's/^server-ip=.*/server-ip=$server_ip/' server.properties || echo 'server-ip=$server_ip' >> server.properties
+grep -q '^server-port=' server.properties && sed -i 's/^server-port=.*/server-port=$server_port/' server.properties || echo 'server-port=$server_port' >> server.properties
+grep -q '^max-players=' server.properties && sed -i 's/^max-players=.*/max-players=$server_slots/' server.properties || echo 'max-players=$server_slots' >> server.properties
+grep -q '^enable-query=' server.properties && sed -i 's/^enable-query=.*/enable-query=true/' server.properties || echo 'enable-query=true' >> server.properties
+#
 if [ $? -eq 0 ]; then
     echo -e "\E[32m\033[1m[DONE]\033[0m"
 else
