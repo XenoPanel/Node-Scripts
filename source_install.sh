@@ -1,6 +1,14 @@
 #!/bin/bash
 #
 #
+# XenoPanel Source Installer
+# Last Synced:
+#
+# We recommend you leave this file alone UNLESS you have experiance with Linux & SteamCMD.
+# 
+# ** WARNING ** 
+# When you sync/update the machines XenoPanel version from within the panel it will re-create this file.
+#
 game_id="$1"
 server_id="$2"
 server_short="$3"
