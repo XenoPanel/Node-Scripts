@@ -20,17 +20,25 @@ checkRoot=on
 alternateurl=off
 #
 INSTALL_DIRECTORY="$1"
+USERNAME="$2"
 #
 IGNORE_CERT="no"
+echo "{INSTALLER_START}"
+printf "Welcome to the XenoPanel2 PMMP Game installer!\n" 
+printf "We are now downloading MCPE! This may take a while...\n"
+printf "\n"
+printf "Game Downloading: PocketMine-MP"
+printf "\n\n"
 #
-if [[ ! -z 'which yum' ]]; then
-    apt-get install -y wget tar curl &> /dev/null
-    wget https://raw.githubusercontent.com/composer/getcomposer.org/1b137f8bf6db3e79a38a5bc45324414a6b1f9df2/web/installer -O - -q | php -- --quiet &> /dev/null
-fi
-#
-if [[ ! -z 'which apt-get' ]]; then
-    yum install -y wget tar curl &> /dev/null
-    wget https://raw.githubusercontent.com/composer/getcomposer.org/1b137f8bf6db3e79a38a5bc45324414a6b1f9df2/web/installer -O - -q | php -- --quiet &> /dev/null
+if [[ ! -z 'which composer' ]]; then
+	if [[ ! -z 'which yum' ]]; then
+	    apt-get install -y wget tar curl &> /dev/null
+	    wget https://raw.githubusercontent.com/composer/getcomposer.org/1b137f8bf6db3e79a38a5bc45324414a6b1f9df2/web/installer -O - -q | php -- --quiet &> /dev/null
+	fi
+	if [[ ! -z 'which apt-get' ]]; then
+	    yum install -y wget tar curl &> /dev/null
+	    wget https://raw.githubusercontent.com/composer/getcomposer.org/1b137f8bf6db3e79a38a5bc45324414a6b1f9df2/web/installer -O - -q | php -- --quiet &> /dev/null
+	fi
 fi
 #
 while getopts "rucid:v:t:" opt; do
@@ -260,20 +268,15 @@ if ! [ -s "$NAME.phar" ] || [ "$(head -n 1 $NAME.phar)" == '<!DOCTYPE html>' ]; 
 	echo " failed!"
 	echo "[!] Couldn't download $NAME automatically from $VERSION_DOWNLOAD"
 	exit 1
-else
-	if [ "$CHANNEL" == "soft" ]; then
-		download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-Soft/${BRANCH}/resources/start.sh" > start.sh
-	else
-		download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/start.sh" > start.sh
-	fi
-	download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/LICENSE" > LICENSE
-	download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/README.md" > README.md
-	download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/CONTRIBUTING.md" > CONTRIBUTING.md
-	download_file "https://raw.githubusercontent.com/pmmp/php-build-scripts/${BRANCH}/compile.sh" > compile.sh
 fi
 #
+chown -R $USERNAME:panel $INSTALL_DIRECTORY
 chmod +x compile.sh
-chmod +x start.sh
+rm -f README.md
+rm -f CONTRIBUTING.md
+rm -f LICENSE
+rm -f start.sh
+rm -f start.bat
 #
 echo " [DONE]"
 #
@@ -329,6 +332,7 @@ else
 		exec "./compile.sh"
 	fi
 fi
+cd "$INSTALL_DIRECTORY"
 #
 rm compile.sh
 rm -f README.md
@@ -338,6 +342,6 @@ rm -f start.sh
 rm -f start.bat
 #
 echo -e ""
-echo "Install Complete! \n You may now start your server..."
-
+echo "Install Complete! \n You may now start your server... "
+echo "{INSTALLER_END}"
 exit 0

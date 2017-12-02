@@ -1,12 +1,5 @@
 #!/bin/bash
 #
-# XenoPanel Installer
-# Last Synced:
-#
-# We recommend you leave this file alone UNLESS you have experiance with Linux & SteamCMD.
-# 
-# ** WARNING ** 
-# When you sync/update the machines XenoPanel version from within the panel it will re-create this file.
 #
 game_id="$1"
 server_id="$2"
@@ -14,13 +7,13 @@ server_short="$3"
 server_username="$4"
 login_username="$5"
 #
-server_base="/home/XenoPanel/$server_username"
+server_base="/home/XenoPanel/servers/$server_username"
 server_directory="/home/XenoPanel/servers/$server_username/$server_id/steamcmd"
 #
 server_install="+login $login_username +force_install_dir $server_base/$server_id +app_update $game_id validate +quit"
 #
 #
-echo "{SOURCE_INSTALLER_START}"
+echo "{INSTALLER_START}"
 #
 # Deletect either apt-get or yum.
 #
@@ -108,6 +101,6 @@ echo -e ""
 echo "Install Complete! \n You may now start your server..."
 echo "You can configure the game by using the 'Configure' button in the controls bar."
 #
-echo "{SOURCE_INSTALLER_END}"
+echo "{INSTALLER_END}"
 #
 exit

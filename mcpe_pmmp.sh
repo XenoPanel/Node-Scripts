@@ -1,7 +1,4 @@
 #!/bin/bash
-dir="$1"
-cd "$DIR"
-
 DO_LOOP="no"
 
 while getopts "p:f:l" OPTION 2> /dev/null; do
@@ -34,7 +31,7 @@ if [ "$PHP_BINARY" == "" ]; then
 fi
 
 if [ "$POCKETMINE_FILE" == "" ]; then
-	if [ -f ./PocketMine-MP.phar ]; then
+	if [ -f ./minecraft_server.phar ]; then
 		POCKETMINE_FILE="./minecraft_server.phar"
 	elif [ -f ./src/pocketmine/PocketMine.php ]; then
 		POCKETMINE_FILE="./src/pocketmine/PocketMine.php"
@@ -63,3 +60,4 @@ while [ "$LOOPS" -eq 0 ] || [ "$DO_LOOP" == "yes" ]; do
 		((LOOPS++))
 	fi
 done
+rm mcpe_pmmp.sh
