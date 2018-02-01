@@ -103,18 +103,6 @@ else
     exit
 fi
 #
-# Cleanup SH scripts
-#
-cd $server_base
-printf "Removing SH scripts... "
-find . -name '*.sh' -type f -delete &> /dev/null
-if [ $? -eq 0 ]; then
-    echo -e "\E[32m\033[1m[DONE]\033[0m"
-else
-    echo -e "\E[31m\033[1m[ERROR]\033[0m"
-    exit
-fi
-#
 chown -R $server_username:panel $server_base &> /dev/null
 #
 echo -e ""
