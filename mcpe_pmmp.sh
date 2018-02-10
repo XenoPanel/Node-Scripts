@@ -1,4 +1,13 @@
 #!/bin/bash
+#
+# XenoPanel MCPE Installer
+# Last Synced: 10/02/2018
+#
+# We recommend you leave this file alone UNLESS you have experiance with Linux.
+# 
+# ** WARNING ** 
+# When you sync/update the machines XenoPanel version from within the panel it will re-create this file.
+#
 DO_LOOP="no"
 
 while getopts "p:f:l" OPTION 2> /dev/null; do

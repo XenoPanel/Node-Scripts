@@ -1,8 +1,7 @@
 #!/bin/bash
 #
-#
 # XenoPanel Source Installer
-# Last Synced:
+# Last Synced: 10/02/2018
 #
 # We recommend you leave this file alone UNLESS you have experiance with Linux & SteamCMD.
 # 

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# XenoPanel Installer
-# Last Synced:
+# XenoPanel MCPE Installer
+# Last Synced: 10/02/2018
 #
 # We recommend you leave this file alone UNLESS you have experiance with Linux.
 # 
