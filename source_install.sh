@@ -93,8 +93,8 @@ fi
 #
 printf "Copying final files for future updating... "
 chown -R $server_username:panel $server_base &> /dev/null
-mkdir -p $server_full/.steam/sdk32 &> /dev/null
-cp -v linux32/steamclient.so $server_full/.steam/sdk32/steamclient.so &> /dev/null
+mkdir -p .steam/sdk32 &> /dev/null
+cp -v linux32/steamclient.so .steam/sdk32/steamclient.so &> /dev/null
 if [ $? -eq 0 ]; then
     echo -e "[DONE]"
 else
