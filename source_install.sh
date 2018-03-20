@@ -13,11 +13,12 @@ server_id="$2"
 server_short="$3"
 server_username="$4"
 login_username="$5"
+login_password="$6"
 #
 server_base="/home/XenoPanel/servers/$server_username"
 server_directory="/home/XenoPanel/servers/$server_username/$server_id/steamcmd"
 #
-server_install="+login $login_username +force_install_dir $server_base/$server_id +app_update $game_id validate +quit"
+server_install="+login $login_username $login_password +force_install_dir $server_base/$server_id +app_update $game_id validate +quit"
 #
 #
 echo "{INSTALLER_START}"
