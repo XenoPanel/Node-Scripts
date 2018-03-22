@@ -16,6 +16,7 @@ login_username="$5"
 login_password="$6"
 #
 server_base="/home/XenoPanel/servers/$server_username"
+server_main="/home/XenoPanel/servers/$server_username/$server_id"
 server_directory="/home/XenoPanel/servers/$server_username/$server_id/steamcmd"
 #
 server_install="+login $login_username $login_password +force_install_dir $server_base/$server_id +app_update $game_id validate +quit"
@@ -46,11 +47,11 @@ sleep 1
 #
 printf "Checking and installing dependencies... "
 if [ "$packman" == "apt-get" ]; then
-    apt-get install -y wget tar lib32gcc1 libgcc_s.so.1 libstdc++.i686 lib32tinfo5 ncurses-libs.i68 gdb &> /dev/null
+    apt-get install -y wget tar lib32gcc1 libgcc_s.so.1 libstdc++.i686 lib32tinfo5 ncurses-libs.i68 gdb hashdeep &> /dev/null
 fi
 
 if [ "$packman" == "yum" ]; then
-    yum install -y wget tar lib32gcc1 glibc.i686 libstdc++.i686 libgcc_s.so.1 lib32tinfo5 ncurses-libs.i68 gbp &> /dev/null
+    yum install -y wget tar lib32gcc1 glibc.i686 libstdc++.i686 libgcc_s.so.1 lib32tinfo5 ncurses-libs.i68 gbp hashdeep &> /dev/null
 fi
 #
 # Check if installed
@@ -102,6 +103,13 @@ else
     echo -e "[ERROR]"
     exit
 fi
+#
+# Running intergrity stamp
+#
+printf "Storing intergity details... "
+mkdir -p /home/XenoPanel/integrity
+hashdeep -r $server_directory > /home/XenoPanel/integrity/$server_id_steamcmd
+hashdeep $server_main/srcds_run > /home/XenoPanel/integrity/$server_id_boot
 #
 chown -R $server_username:panel $server_base &> /dev/null
 #
