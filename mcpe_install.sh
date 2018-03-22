@@ -21,6 +21,7 @@ alternateurl=off
 #
 INSTALL_DIRECTORY="$1"
 USERNAME="$2"
+SERVER_ID="$3"
 #
 IGNORE_CERT="no"
 echo "{INSTALLER_START}"
@@ -29,6 +30,14 @@ printf "We are now downloading MCPE! This may take a while...\n"
 printf "\n"
 printf "Game Downloading: PocketMine-MP"
 printf "\n\n"
+#
+if [[ ! -z 'which yum' ]]; then
+    packman="yum"
+fi
+#
+if [[ ! -z 'which apt-get' ]]; then
+    packman="apt-get"
+fi
 #
 if [[ ! -z 'which composer' ]]; then
 	if [[ ! -z 'which yum' ]]; then
@@ -39,6 +48,14 @@ if [[ ! -z 'which composer' ]]; then
 	    yum install -y wget tar curl &> /dev/null
 	    wget https://raw.githubusercontent.com/composer/getcomposer.org/1b137f8bf6db3e79a38a5bc45324414a6b1f9df2/web/installer -O - -q | php -- --quiet &> /dev/null
 	fi
+fi
+#
+if [ "$packman" == "apt-get" ]; then
+    apt-get install -y hashdeep &> /dev/null
+fi
+
+if [ "$packman" == "yum" ]; then
+    yum install -y hashdeep &> /dev/null
 fi
 #
 while getopts "rucid:v:t:" opt; do
@@ -340,6 +357,12 @@ rm -f CONTRIBUTING.md
 rm -f LICENSE
 rm -f start.sh
 rm -f start.bat
+#
+# Running intergrity stamp
+#
+printf "Storing intergity details... "
+mkdir -p /home/XenoPanel/integrity
+hashdeep -r $INSTALL_DIRECTORY/bin > /home/XenoPanel/integrity/$server_id_boot
 #
 echo -e ""
 echo "Install Complete! \n You may now start your server... "
