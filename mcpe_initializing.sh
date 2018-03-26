@@ -14,6 +14,7 @@ server_ip="$3"
 server_port="$4"
 server_slots="$5"
 server_memory="$6"
+server_memory+="M"
 #
 default_properties="https://xenopanel.com/api/mcpe/server.properties"
 #
