@@ -13,6 +13,7 @@ server_directory="$2"
 server_ip="$3"
 server_port="$4"
 server_slots="$5"
+server_memory="$6"
 #
 default_properties="https://xenopanel.com/api/mcpe/server.properties"
 #
@@ -69,9 +70,11 @@ printf "Updating server properties... "
 sed -i 's/%IP%.*/'"$server_ip"'/' *properties &> /dev/null
 sed -i 's/%PORT%.*/'"$server_port"'/' *properties &> /dev/null
 sed -i 's/%SLOTS%.*/'"$server_slots"'/' *properties &> /dev/null
+sed -i 's/%MEMORY%.*/'"$server_memory"'/' *properties &> /dev/null
 sed -i 's/server-ip=.*/'"server-ip=$server_ip"'/' *properties &> /dev/null
 sed -i 's/enable-query=.*/enable-query=true/g' *properties &> /dev/null
 sed -i 's/server-port=.*/'"server-port=$server_port"'/' *properties &> /dev/null
+sed -i 's/memory-limit=.*/'"memory-limit=$server_memory"'/' *properties &> /dev/null
 sed -i 's/max-players=.*/'"max-players=$server_slots"'/' *properties &> /dev/null
 if [ $? -eq 0 ]; then
     echo -e "\E[32m\033[1m[DONE]\033[0m"
