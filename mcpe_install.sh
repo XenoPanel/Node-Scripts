@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # XenoPanel MCPE Installer
-# Last Synced: 10/02/2018
+# Last Synced: 18/05/2019
 #
 # We recommend you leave this file alone UNLESS you have experiance with Linux.
 # 
@@ -10,7 +10,7 @@
 #
 CHANNEL="alpha"
 BRANCH="master"
-NAME="minecraft_server"
+NAME="PocketMine-MP"
 BUILD_URL=""
 #
 update=off
@@ -152,9 +152,7 @@ function parse_json {
 #
 if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	BASE_VERSION="custom"
-	VERSION="custom"
 	BUILD="unknown"
-	API_VERSION="unknown"
 	VERSION_DATE_STRING="unknown"
 	ENABLE_GPG="no"
 	VERSION_DOWNLOAD="$BUILD_URL"
@@ -162,62 +160,35 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	PHP_VERSION="unknown"
 else
 	echo "[*] Retrieving latest build data for channel \"$CHANNEL\""
-
-	VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}/api/json?pretty=true&tree=url,artifacts[fileName],number,timestamp")
-
+	VERSION_DATA=$(download_file "https://update.pmmp.io/api?channel=$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}")
 	if [ "$VERSION_DATA" != "" ]; then
-		FILENAME="unknown"
-
-		IFS=$'\n' FILENAMES=($(parse_json "$VERSION_DATA" fileName))
-		for (( i=0; i<${#FILENAMES[@]}; i++ ))
-		do
-			if [[ ${FILENAMES[$i]} == PocketMine*.phar ]]; then
-				FILENAME=${FILENAMES[$i]}
-				break
-			fi
-		done
-		if [ "$FILENAME" == "unknown" ]; then
-			echo "[!] Couldn't determine filename of artifact to download"
+		error=$(parse_json "$VERSION_DATA" error)
+		if [ "$error" != "" ]; then
+			echo "[!] Failed to get download information: $error"
 			exit 1
 		fi
-
-		BUILD_INFO_JSON=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}/artifact/build_info.json")
-
-		VERSION=$(parse_json "$BUILD_INFO_JSON" pm_version)
-		BUILD=$(parse_json "$BUILD_INFO_JSON" build_number)
-		API_VERSION=$(parse_json "$BUILD_INFO_JSON" api_version)
-		MCPE_VERSION=$(parse_json "$BUILD_INFO_JSON" mcpe_version)
-		PHP_VERSION=$(parse_json "$BUILD_INFO_JSON" php_version)
-
-		VERSION_DATE=$(($(echo "$VERSION_DATA" | grep -m 1 '"timestamp"' | cut -d ':' -f2- | tr -d ' ",') / 1000))
+		FILENAME=$(parse_json "$VERSION_DATA" phar_name)
+		BASE_VERSION=$(parse_json "$VERSION_DATA" base_version)
+		BUILD=$(parse_json "$VERSION_DATA" build_number)
+		MCPE_VERSION=$(parse_json "$VERSION_DATA" mcpe_version)
+		PHP_VERSION=$(parse_json "$VERSION_DATA" php_version)
+		VERSION_DATE=$(parse_json "$VERSION_DATA" date)
 		BASE_URL=$(parse_json "$VERSION_DATA" url)
-		VERSION_DOWNLOAD="${BASE_URL}artifact/${FILENAME}"
-
-		if [ "$alternateurl" == "on" ]; then
-			VERSION_DOWNLOAD=$(parse_json "$VERSION_DATA" alternate_download_url)
-		fi
-
+		VERSION_DOWNLOAD=$(parse_json "$VERSION_DATA" download_url)
 		if [ "$(uname -s)" == "Darwin" ]; then
-			BASE_VERSION=$(echo "$VERSION" | sed -E 's/([A-Za-z0-9_\.]*).*/\1/')
 			VERSION_DATE_STRING=$(date -r $VERSION_DATE)
 		else
-			BASE_VERSION=$(echo "$VERSION" | sed -r 's/([A-Za-z0-9_\.]*).*/\1/')
 			VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
 		fi
-
 		GPG_SIGNATURE=$(parse_json "$VERSION_DATA" signature_url)
-
 		if [ "$GPG_SIGNATURE" != "" ]; then
 			ENABLE_GPG="yes"
 		fi
-
-		if [ "$VERSION" == "" ]; then
+		if [ "$BASE_VERSION" == "" ]; then
 			echo "[!] Couldn't get the latest $NAME version"
 			exit 1
 		fi
-
 		GPG_BIN=""
-
 		if [ "$ENABLE_GPG" == "yes" ]; then
 			type gpg > /dev/null 2>&1
 			if [ $? -eq 0 ]; then
@@ -242,14 +213,14 @@ else
 			fi
 		fi
 	else
-		echo "[!] Couldn't download version information automatically from Jenkins server."
+		echo "[!] Failed to download version information: Empty response from API"
 		exit 1
 	fi
 fi
 #
 #
 #
-echo "[*] Found $NAME $BASE_VERSION (build $BUILD) for Minecraft: PE v$MCPE_VERSION (PHP $PHP_VERSION, API $API_VERSION)"
+echo "[*] Found $NAME $BASE_VERSION (build $BUILD) for Minecraft: PE v$MCPE_VERSION (PHP $PHP_VERSION)"
 echo "[*] This $CHANNEL build was released on $VERSION_DATE_STRING"
 #
 if [ "$ENABLE_GPG" == "yes" ]; then
@@ -262,10 +233,10 @@ fi
 #
 #
 #
-echo "[*] Installing/updating $NAME"
+echo "[*] Installing/updating $NAME on directory $INSTALL_DIRECTORY"
 mkdir -m 0777 "$INSTALL_DIRECTORY" 2> /dev/null
 cd "$INSTALL_DIRECTORY"
-echo "[1/3] Cleaning your server directory..."
+echo "[1/3] Cleaning..."
 rm -f "$NAME.phar"
 rm -f README.md
 rm -f CONTRIBUTING.md
@@ -277,7 +248,7 @@ rm -r -f src/
 #
 #
 #
-echo -n "[2/3] Downloading $NAME $VERSION phar..."
+echo -n "[2/3] Downloading $NAME phar..."
 set +e
 download_file "$VERSION_DOWNLOAD" > "$NAME.phar"
 if ! [ -s "$NAME.phar" ] || [ "$(head -n 1 $NAME.phar)" == '<!DOCTYPE html>' ]; then
@@ -285,19 +256,22 @@ if ! [ -s "$NAME.phar" ] || [ "$(head -n 1 $NAME.phar)" == '<!DOCTYPE html>' ]; 
 	echo " failed!"
 	echo "[!] Couldn't download $NAME automatically from $VERSION_DOWNLOAD"
 	exit 1
+else
+	if [ "$CHANNEL" == "soft" ]; then
+		download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-Soft/${BRANCH}/resources/start.sh" > start.sh
+	else
+		download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/start.sh" > start.sh
+	fi
+	download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/LICENSE" > LICENSE
+	download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/README.md" > README.md
+	download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/CONTRIBUTING.md" > CONTRIBUTING.md
+	download_file "https://raw.githubusercontent.com/pmmp/php-build-scripts/${BRANCH}/compile.sh" > compile.sh
 fi
 #
-chown -R $USERNAME:panel $INSTALL_DIRECTORY
 chmod +x compile.sh
-rm -f README.md
-rm -f CONTRIBUTING.md
-rm -f LICENSE
-rm -f start.sh
-rm -f start.bat
+chmod +x start.sh
 #
-echo " [DONE]"
-#
-#
+echo " done!"
 #
 if [ "$ENABLE_GPG" == "yes" ]; then
 	download_file "$GPG_SIGNATURE" > "$NAME.phar.sig"
@@ -307,48 +281,48 @@ fi
 if [ "$update" == "on" ]; then
 	echo "[3/3] Skipping PHP recompilation due to user request"
 else
-	echo -n "[3/3] Ensuring PHP is installed..."
+	echo -n "[3/3] Obtaining PHP: detecting if build is available..."
 	while [ "$forcecompile" == "off" ]
 	do
 		rm -r -f bin/ >> /dev/null 2>&1
-
-		if [ "$(uname -s)" == "Linux" ]; then
-
+		if [ "$(uname -s)" == "Darwin" ]; then
+			PLATFORM="MacOS-x86_64"
+			echo -n " MacOS PHP build available"
+		elif [ "$(uname -s)" == "Linux" ]; then
 			PLATFORM="Linux-x86_64"
-
+			echo -n " Linux PHP build available"
 		else
+			echo " no prebuilt PHP download available"
 			break
 		fi
+		echo -n "... downloading $PHP_VERSION ..."
 		download_file "https://jenkins.pmmp.io/job/PHP-$PHP_VERSION-Aggregate/lastSuccessfulBuild/artifact/PHP-$PHP_VERSION-$PLATFORM.tar.gz" | tar -zx > /dev/null 2>&1
-
 		chmod +x ./bin/php7/bin/*
 		if [ -f ./bin/composer ]; then
 			chmod +x ./bin/composer
 		fi
-
+		echo -n " updating php.ini..."
+		sed -i'.bak' "s/date.timezone=.*/date.timezone=$(date +%Z)/" bin/php7/bin/php.ini
+		EXTENSION_DIR=$(find "$(pwd)/bin" -name *debug-zts*) #make sure this only captures from `bin` in case the user renamed their old binary folder
+		#Modify extension_dir directive if it exists, otherwise add it
+		grep -q '^extension_dir' bin/php7/bin/php.ini && sed -i'bak' "s{^extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" bin/php7/bin/php.ini || echo "extension_dir=\"$EXTENSION_DIR\"" >> bin/php7/bin/php.ini
+		echo -n " checking..."
 		if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
-
-			sed -i'.bak' "s/date.timezone=.*/date.timezone=$(date +%Z)/" bin/php7/bin/php.ini
-
-			EXTENSION_DIR=$(find "$(pwd)/bin" -name *debug-zts*)
-
-			grep -q '^extension_dir' bin/php7/bin/php.ini && sed -i'bak' "s{^extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" bin/php7/bin/php.ini || echo "extension_dir=\"$EXTENSION_DIR\"" >> bin/php7/bin/php.ini
-
-			echo " [DONE]"
+			echo " done"
 			alldone=yes
 		else
 			echo " downloaded PHP build doesn't work on this platform!"
 		fi
-
 		break
 	done
 	if [ "$alldone" == "no" ]; then
 		set -e
-		echo "[3/3] No prebuilt PHP found, compiling PHP automatically. This might take a while..."
+		echo "[3/3] No prebuilt PHP found, compiling PHP automatically. This might take a while."
 		echo
 		exec "./compile.sh"
 	fi
 fi
+#
 cd "$INSTALL_DIRECTORY"
 #
 rm compile.sh
